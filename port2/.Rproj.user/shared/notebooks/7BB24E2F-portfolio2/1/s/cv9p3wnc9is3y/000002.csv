@@ -1,0 +1,6 @@
+"0",""
+"0","data_melt <- reshape::melt(data=data,"
+"0","                           id.vars=c(""id"",""verb1"",""perfo1""),"
+"0","                           na.rm=F)"
+"0",""
+"0","print(head(data_melt,10))"

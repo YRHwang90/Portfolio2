@@ -1,0 +1,17 @@
+df<-structure(list(Number = c("375_1", "375_1", "375_1", "375_1", 
+                              "375_1", "375_1", "375_1", "375_1", "647_1", "647_1", "647_1", 
+                              "647_1", "647_1", "647_1", "647_1", "647_1", "647_1", "647_1", 
+                              "647_1", "647_1"), year = c(1973, 1973, 1973, 1973, 1973, 1973, 
+                                                          1973, 1973, 1981, 1981, 1981, 1981, 1981, 1981, 1981, 1981, 1981, 
+                                                          1981, 1981, 1981), Country = c("AUT", "PRT", "CHE", "NOR", "SWE", 
+                                                                                         "ISL", "DNK", "GBR", "BRA", "CHL", "EGY", "IND", "ISR", "MEX", 
+                                                                                         "PER", "KOR", "PAK", "PHL", "TUN", "TUR")), row.names = c(NA, 
+                                                                                                                                                   -20L), class = c("tbl_df", "tbl", "data.frame"))
+
+
+final <- df %>% group_by(Number, year)%>%  expand(Country1 = Country, Country2= Country) %>% filter(Country1!=Country2)
+
+
+df %>%
+  full_join(df, by=c("Number", "year")) %>%
+  filter(Country.x != Country.y)

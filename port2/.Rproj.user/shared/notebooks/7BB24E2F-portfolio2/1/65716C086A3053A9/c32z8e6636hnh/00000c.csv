@@ -1,0 +1,6 @@
+"0","filepath <- ""https://quantdev.ssri.psu.edu/sites/qdev/files/wisc3raw_gender.csv"""
+"0","wisc4raw<-read.csv(file=url(filepath), header=T)"
+"0",""
+"0","data<-wisc4raw[,c(""id"",""verb1"",""verb6"",""perfo1"",""perfo6"")]"
+"0",""
+"0","print(head(data,10))"

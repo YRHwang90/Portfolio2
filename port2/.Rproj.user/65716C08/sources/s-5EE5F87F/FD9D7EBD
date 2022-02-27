@@ -1,27 +1,28 @@
 {
-    "id": "54AB6601",
+    "id": "FD9D7EBD",
     "path": "C:/data/GitHub/Portfolio2/port2/portfolio2.Rmd",
     "project_path": "portfolio2.Rmd",
     "type": "r_markdown",
-    "hash": "3617812006",
+    "hash": "1325548204",
     "contents": "",
     "dirty": false,
-    "created": 1642640622567.0,
+    "created": 1644644131808.0,
     "source_on_save": false,
     "relative_order": 1,
     "properties": {
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "21,0",
-        "scrollLine": "12"
+        "cursorPosition": "255,115",
+        "scrollLine": "237",
+        "last_setup_crc32": "5EE5F87Fbb338d19"
     },
     "folds": "",
-    "lastKnownWriteTime": 1642641113,
+    "lastKnownWriteTime": 1645943255,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1642641113345,
+    "last_content_update": 1645943255958,
     "read_only": false,
     "read_only_alternatives": []
 }

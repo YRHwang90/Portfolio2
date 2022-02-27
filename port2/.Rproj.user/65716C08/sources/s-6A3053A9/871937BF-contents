@@ -1,0 +1,437 @@
+---
+title: "Portfolio1: MLM"
+author: "Yoo Ri Hwang"
+date: "1/15/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Source 
+
+
+
+https://stat.utexas.edu/images/SSC/documents/SoftwareTutorials/MultilevelModeling.pdf
+
+https://cehs-research.github.io/eBook_multilevel/mlm-2-levels-pupil-popularity.html
+
+I refer the code on these websites. 
+I followed the general tutorials instructed on these website.
+
+However, I made some changes. (I do some extra analysis that was not on the website etc. )
+I also explained by myself. 
+
+###   notification 
+ICC calculated based on the null model. 
+
+# Prepare
+
+##  load library
+```{r, warning=FALSE, message=FALSE}
+
+library(foreign)
+library(tidyverse)
+library(haven)    
+library(furniture)    
+#install.packages('furniture')
+library(stargazer)    
+library(texreg)   
+#install.packages('texreg')
+library(gridExtra)    
+#install.packages('gridExtra')
+library(psych)        
+library(car)      
+#install.packages('car')
+library(nlme)
+library(lme4)         
+library(lmerTest)     
+library(optimx)
+#install.packages('optimx')
+# oh my gosh this never ends. 
+
+# packages <- c('performance','interactions','HLMdiag','sjstats')
+# 
+# installed_packages <- packages %in% rownames(installed.packages())
+# if (any(installed_packages == FALSE)) {
+#   install.packages(packages[!installed_packages])
+# }
+
+
+#devtools::install_github("goodekat/redres")
+
+library(performance)  
+library(interactions) 
+library(HLMdiag)      
+library(redres)       
+library(sjstats)     
+library(predict3d)
+
+```
+
+## load data
+```{r, message=FALSE, warning=FALSE}
+data_raw <- haven::read_sav("https://github.com/MultiLevelAnalysis/Datasets-third-edition-Multilevel-book/raw/master/chapter%202/popularity/SPSS/popular2.sav")
+
+summary(data_raw)
+```
+data structure:
+
+pupils are nested in the class. 
+trying to predict popluarity of pupil by pupil's gender and extravert. Furthermore, teacher's experience (class-level variable) will be considered. 
+
+To sum up, we have
+
+Level-1 IV:
+pupil gender (SEX): coded as boy=0, girl=1  
+Pupil's extroversion (extrav) : 10-point scale.  
+
+Level-2IV:
+teacher's experience (texp)
+
+subsetting the data
+
+```{r, warning=FALSE}
+
+# we only take what we need
+
+data_pop <- data_raw %>%
+  dplyr::mutate(id = paste(class,pupil, sep = "-") %>% #creating uniqe ids for student 
+                  factor()) %>%
+  dplyr::select(id,pupil:popteach)
+
+tibble::glimpse(head(data_pop,10))
+```
+
+check our fancy data
+
+```{r, warning=FALSE}
+
+data_pop %>%
+  dplyr::select(extrav, sex, texp, popular) %>%
+  data.frame() %>%
+  stargazer::stargazer(header=F,type="text")
+
+```
+
+## simple plots 
+
+1. when we overlook nested structure 
+```{r, warning=FALSE}
+data_pop %>%
+  ggplot() +
+  aes(x = extrav, y = popular)+ 
+  geom_point()+
+  stat_smooth(method=lm)
+```
+2. consider cluster (group)
+
+just for curious, we pick first 9 class and see 
+```{r, warning=FALSE}
+data_pop %>%
+  dplyr::filter(class<=9)%>%
+  ggplot() +
+  aes(x = extrav, y = popular)+ 
+  geom_point()+
+  stat_smooth(method=lm)+
+  facet_wrap(~ class) 
+
+```
+3.
+
+```{r, message=F, warning=F}
+
+ggplot(data      = data_pop,
+       aes(x     = extrav,
+           y     = popular,
+           col   = class,
+           group = class)) + 
+  geom_point(size     = 1,
+             alpha    = .5,
+             position = "jitter") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+     geom_smooth(method = lm,
+              se     = FALSE,
+              size   = .5, 
+              alpha  = .8)+ # to add regression line
+  labs(title    = "Popularity vs. Extraversion")
+  
+  
+```
+This code (for third graph) was adpated from "https://www.rensvandeschoot.com/tutorials/lme4/"
+
+## Centering
+
+In the tutorial website, the author did not do the centering and keep analyzing. However, in most cases, it is not useful unless it has certian theoritical reasons. 
+
+```{r}
+#install.packages('misty')
+library(misty)
+
+#center level-1 predictor at the grandmean
+data_pop$cgm_extrav<-misty::center(data_pop$extrav)
+data_pop$cgm_sex<-misty::center(data_pop$sex)
+data_pop$cgm_texp<-misty::center(data_pop$texp)
+
+#center level-1 predictor at the clustermean
+data_pop$cwc_extrav<-misty::center(data_pop$extrav, type="CWC", cluster = data_pop$class)
+data_pop$cwc_sex<-misty::center(data_pop$sex, type="CWC", cluster = data_pop$class)
+
+```
+## Single-level equation (regression)
+
+
+$$POP_{ij} = \beta_{0} + \beta_{1}SEX_{ij} + \beta_{2}EXT_{ij}+e_{ij}$$
+Random parameter: $var[e_{ij}]$  
+fixed: intercept, slopes.
+
+I won't check the interaction at this point. 
+This single-level regression is rediculous in that it ignore nonindependenc. 
+
+```{r, warning=FALSE}
+
+pop_lm<- lm(popular ~ sex + extrav, data = data_pop) 
+
+summary(pop_lm)
+
+
+```
+
+
+# MULTILEVEL ANALYSIS 
+
+
+
+## 1. intercept-only model (unconditional model, a.k.a. null model)
+
+level 1:   
+$$y_{ij} = \beta_{0j} + e_{ij}$$
+level2:  
+$\beta_{0j}$ is the intercept, and this can be expressed as:  
+
+$$ \beta_{0j} = \gamma_{00} + u_{0j}$$
+$\gamma_{00}$  =  (overall mean)   
+$u_{0j}$ = class effect, the variance of the mean for each class around the overall mean of DV (popular) score. 
+
+Combined together : mixed model 
+
+$$y_{ij} = \gamma_{00} + u_{0j} + e_{ij}$$
+random effect: var[$e_{ij}$], var[$u_{0j}$]
+fixed effect:  $\gamma_{00}$
+
+
+```{r, message=FALSE}
+
+#My preference towards REML :D
+
+null<-lmer(popular~1 + (1|class), data=data_pop, REML=TRUE)
+summary(null)
+
+
+
+```
+
+Interpretaion: grandmean of pop of all students = 5.0779
+class average tends to vary by 0.08738 (approximately)
+
+ICC : proportion of between-class variance and total variance.
+
+$$\rho = \frac{\sigma^{2}_{u0}}{\sigma^{2}_{u0} + \sigma^{2}_{e}}$$
+
+
+
+By hand... 
+$$\rho = \frac{0.7021}{0.7021 + 1.2218}$$
+
+
+
+or..using a great package..
+
+```{r,message=F, warning=F}
+performance::icc(null)
+
+```
+
+interpretation:
+36.5% of variance is due to the group
+
+
+## 2.  one level-1 predictor (fixed)
+
+level 1:   
+$$y_{ij} = \beta_{0j} + \beta_{1j}Extra_{ij} + e_{ij}$$
+level2:  
+
+level2:
+$$ \beta_{0j} = \gamma_{00} + u_{0j}$$
+
+$$ \beta_{1j} = \gamma_{00}$$ 
+we do not have a error term since this is fixed. 
+
+Combined together : mixed model 
+
+$$y_{ij} = \gamma_{00} + \gamma_{10}Extra_{ij} + u_{0j} + e_{ij}$$
+random effect: var[$e_{ij}$], var[$u_{0j}$]  
+fixed effect:  $\gamma_{00}$, $\gamma_{10}$
+
+
+```{r, message=FALSE}
+
+#My preference towards REML :D
+
+onefix<-lmer(popular~1 + cgm_extrav + (1|class), data=data_pop, REML=TRUE)
+summary(onefix)
+
+
+```
+
+
+## 3.  one level-1 predictor (random)
+level 1:   
+$$y_{ij} = \beta_{0j} + \beta_{1j}Extra_{ij} + e_{ij}$$
+level2:  
+
+level2:
+$$ \beta_{0j} = \gamma_{00} + u_{0j}$$
+
+$$ \beta_{1j} = \gamma_{10} + u_{1j}$$ 
+
+
+Combined together : mixed model 
+
+$$y_{ij} = \gamma_{00} + \gamma_{10}Extra_{ij} + u_{0j} + u_{1j}Extrav_{ij} + e_{ij}$$
+
+
+random effect: var[$e_{ij}$], var[$u_{0j}$]  
+fixed effect:  $\gamma_{00}$, $\gamma_{10}$
+
+
+```{r, message=FALSE}
+
+#My preference towards REML :D
+
+oneram<-lmer(popular~1 + cgm_extrav + (1 + cgm_extrav|class), data=data_pop, REML=TRUE)
+summary(oneram)
+
+
+```
+
+
+
+
+
+
+
+##  4. two level-1 predictor (random)
+
+level 1:   
+$$y_{ij} = \beta_{0j} + \beta_{1j}EXTRA_{ij} + \beta_{1j}SEX_{ij} + e_{ij}$$
+level2:  
+
+level2:
+$$ \beta_{0j} = \gamma_{00} + u_{0j}$$
+
+$$ \beta_{1j} = \gamma_{10} + u_{1j}$$ 
+$$ \beta_{2j} = \gamma_{20} + u_{2j}$$ 
+
+
+Combined together : mixed model 
+
+$$y_{ij} = \gamma_{00} + \gamma_{10}Extra_{ij} + \gamma_{20}SEX_{ij} + u_{0j} + u_{1j}Extrav_{ij} + u_{2j}SEX_{ij} + e_{ij}$$
+
+
+
+
+```{r}
+
+
+
+tworam<-lmer(popular~1 + cgm_extrav + cgm_sex + (1 + cgm_extrav+cgm_sex|class), data=data_pop)
+summary(tworam)
+
+
+```
+model failed (convergency problem)
+with a random effect with a variance very close to zero, this model should be reconsidered : convergency  
+
+Alternatively, using ML: 
+```{r}
+
+
+tworam<-lmer(popular~1 + cgm_extrav + cgm_sex + (1 + cgm_extrav+cgm_sex|class), data=data_pop, REML=FALSE)
+summary(tworam)
+isSingular(tworam, tol = 1e-4)
+```
+ matrix argument is singular.
+ 
+ 
+##  5. one level-2 predictor and two level-1 predictor (w/o interaction)
+
+
+level 1:   
+$$y_{ij} = \beta_{0j} + \beta_{1j}EXTRA_{ij} + \beta_{2j}SEX_{ij} + e_{ij}$$
+
+level2:
+$$ \beta_{0j} = \gamma_{00} +\gamma_{01}Texp_{j} + u_{0j}$$
+
+$$ \beta_{1j} = \gamma_{10} + u_{1j}$$ 
+$$ \beta_{2j} = \gamma_{20} + u_{2j}$$ 
+
+
+Combined together : mixed model 
+
+$$y_{ij} = \gamma_{00} +\gamma_{01}Texp_{j} + \gamma_{20}SEX_{ij} +  u_{1j}Extrav_{ij} + u_{2j}SEX_{ij} + u_{0j}+e_{ij}$$
+
+
+
+```{r, message=FALSE}
+
+#My preference towards REML :D
+# 
+inter<-lmer(popular~1+cgm_extrav+cgm_sex+texp + (1+cgm_extrav+cgm_sex|class), data = data_pop)
+summary(inter)
+
+
+```
+
+
+## 6. two levle-1 predictor, two level 1 predictior (with cross-level interaction)
+
+
+level 1:   
+$$y_{ij} = \beta_{0j} + \beta_{1j}EXTRA_{ij} + \beta_{2j}SEX_{ij} + e_{ij}$$
+
+level2:
+$$ \beta_{0j} = \gamma_{00} +\gamma_{01}Texp_{j} + u_{0j}$$
+
+$$ \beta_{1j} = \gamma_{10} +\gamma_{11}Texp_{j}+ u_{1j}$$ 
+$$ \beta_{2j} = \gamma_{20} +\gamma_{21}Texp_{j}+ u_{2j}$$ 
+
+
+Combined together : mixed model 
+
+$$y_{ij} = \gamma_{00} +\gamma_{01}Texp_{j} + \gamma_{10}Extra_{ij} + \gamma_{20}SEX_{ij} + \gamma_{11}Texp_{j}*Extrav_{ij} + \gamma_{21}Texp_{j}*Sex_{ij} + u_{1j}*Extrav_{ij} + u_{2j}SEX_{ij} + u_{0j}+e_{ij}$$
+
+
+```{r}
+
+#My preference towards REML :D
+# 
+inter<-lmer(popular~1+cgm_extrav+cgm_sex+cgm_texp + cgm_extrav*cgm_texp+cgm_sex*cgm_texp+ (1+cgm_extrav+cgm_sex|class), data = data_pop)
+summary(inter)
+isSingular(inter, tol = 1e-4)
+# the matrix argument is singular. 
+```
+If i did not center level 2 variable, it is like this. 
+```{r}
+
+inter<-lmer(popular~1+cgm_extrav+cgm_sex+texp + cgm_extrav*texp+cgm_sex*texp+ (1+cgm_extrav+cgm_sex|class), data = data_pop)
+summary(inter)
+
+```
+
+
+

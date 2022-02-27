@@ -1,0 +1,6 @@
+"0",""
+"0","data %>%"
+"0","  describe(verb1, verb1, perfo1, perfo6) "
+"2","Error in describe(., verb1, verb1, perfo1, perfo6) : 
+  object 'verb1' not found
+"

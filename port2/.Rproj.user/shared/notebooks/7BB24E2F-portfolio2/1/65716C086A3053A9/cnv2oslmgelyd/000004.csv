@@ -1,0 +1,4 @@
+"0",""
+"0","colnames(data_melt)[4:5]<-c(""grade6_variable"",""grade6_score"")"
+"0","data_melt<-data_melt[order(data_melt$id, data_melt$grade6_variable),]"
+"0","print(head(data_melt,10))"

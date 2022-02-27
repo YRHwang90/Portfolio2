@@ -1,0 +1,28 @@
+{
+    "id": "C4B28398",
+    "path": null,
+    "project_path": null,
+    "type": "object_explorer",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1645769248319.0,
+    "source_on_save": false,
+    "relative_order": 7,
+    "properties": {
+        "id": "3e212ef9fa8b4672a6f92347e0a2a8c2",
+        "name": "pairwise",
+        "title": "pairwise",
+        "language": "R",
+        "source_window_id": "",
+        "Source": "Source"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 2309044004024,
+    "encoding": "",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1645769248319,
+    "read_only": false,
+    "read_only_alternatives": []
+}
