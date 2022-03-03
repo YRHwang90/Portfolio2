@@ -165,10 +165,6 @@ print(head(data_melt,10))
 The website's explanation is not detailed enough for understand.
 Here is some steps for undertanding this model.
 
-$$ Grade6outcome_{ij} = VerbOn_{ij}*(\beta_{v0} + \beta_{v1}(Verb1)_{ij}+\beta_{v2}(Perform1)+e_{vj}) + PerformOn_{ij}*(\beta_{p3}+\beta_{p4}(perform1)_{ij}+
-\beta_{p5}(verb1)_{ij}+e_{vj}) +  PerformOn_{ij}*(\beta_{p3}+\beta_{p4}(perform1)_{ij}+
-\beta_{p5}(verb1)_{ij}+e_{pj})$$
-
 1) DV= Grade 6 outcome. 
 2) We have both Verbal, and performance.
 
