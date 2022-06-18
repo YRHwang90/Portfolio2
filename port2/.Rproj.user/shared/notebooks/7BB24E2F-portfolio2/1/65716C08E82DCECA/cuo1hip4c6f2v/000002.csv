@@ -1,8 +1,0 @@
-"0",""
-"0","data_long <- reshape(data = data,"
-"0","                    varying = c(""verb1"", ""verb6"","
-"0","                                ""perfo1"", ""perfo6""),"
-"0","                    timevar = c(""grade""), "
-"0","                    idvar = c(""id""),"
-"0","                    direction = ""long"", sep="""")"
-"0",""

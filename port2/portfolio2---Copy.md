@@ -29,9 +29,24 @@ packages
 
 ``` r
 library(ggplot2)   
+```
+
+    ## Warning: package 'ggplot2' was built under R version 4.1.3
+
+``` r
 library(nlme)     
 library(psych)     
+```
+
+    ## Warning: package 'psych' was built under R version 4.1.3
+
+``` r
 library(reshape)   
+```
+
+    ## Warning: package 'reshape' was built under R version 4.1.3
+
+``` r
 library(dplyr)
 ```
 
@@ -89,16 +104,16 @@ print(head(data_long,10))
 
 *Actor effect*
 
-1.  verbal ability in the grade 1 can predict verbal ability in 6
+1)  verbal ability in the grade 1 can predict verbal ability in 6
     grade?  
-2.  performance ability in the garde 1 can predict performance ability
+2)  performance ability in the garde 1 can predict performance ability
     in 6 grade?
 
 *Partner effect*
 
-3.  verbal ability in the grade 1 can predict performance ability in 6
+3)  verbal ability in the grade 1 can predict performance ability in 6
     grade?  
-4.  performance ability in the 1 grade can predict verbal abilit in 6
+4)  performance ability in the 1 grade can predict verbal abilit in 6
     grade
 
 ## Basic descript stats before analysis
@@ -172,8 +187,8 @@ data_long %>%
   facet_wrap( ~id)
 ```
 
-![](portfolio2---Copy_files/figure-gfm/unnamed-chunk-6-1.png)<!-- --> ##
-Data prepare
+![](portfolio2---Copy_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+\## Data prepare
 
 ``` r
 data_melt <- reshape::melt(data=data,
@@ -238,39 +253,56 @@ print(head(data_melt,10))
 The website’s explanation is not detailed enough for understand. Here is
 some steps for undertanding this model.
 
-1.  DV= Grade 6 outcome.
-2.  We have both Verbal, and performance.
+1)  DV= Grade 6 outcome.
+2)  We have both Verbal, and performance.
 
 ### The big equation for two-intercept Approach
 
 \*\* note \*\* The equation from the website and my equation from my
 head has difference (# of residual)
 
-3.  the Equations are like:
+3)  the Equations are like:
 
 So when “verb_on” is equal to 0:
-*G**r**a**d**e*6*o**u**t**c**o**m**e*<sub>*i**j*</sub> = *V**e**r**b**O**n*<sub>*i**j*</sub> \* (*β*<sub>*v*0</sub>+*β*<sub>*v*1</sub>(*V**e**r**b*1)<sub>*i**j*</sub>+*β*<sub>*v*2</sub>(*P**e**r**f**o**r**m*1)+*e*<sub>*v**j*</sub>) + *P**e**r**f**o**r**m**O**n*<sub>*i**j*</sub> \* (*β*<sub>*p*3</sub>+*β*<sub>*p*4</sub>(*p**e**r**f**o**r**m*1)<sub>*i**j*</sub>+*β*<sub>*p*5</sub>(*v**e**r**b*1)<sub>*i**j*</sub>+*e*<sub>*v**j*</sub>)
+
+![ Grade6outcome\_{ij} = VerbOn\_{ij}\*(\\beta\_{v0} + \\beta\_{v1}(Verb1)\_{ij}+\\beta\_{v2}(Perform1)+e\_{vj}) + PerformOn\_{ij}\*(\\beta\_{p3}+\\beta\_{p4}(perform1)\_{ij}+
+\\beta\_{p5}(verb1)\_{ij}+e\_{vj})](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%20Grade6outcome_%7Bij%7D%20%3D%20VerbOn_%7Bij%7D%2A%28%5Cbeta_%7Bv0%7D%20%2B%20%5Cbeta_%7Bv1%7D%28Verb1%29_%7Bij%7D%2B%5Cbeta_%7Bv2%7D%28Perform1%29%2Be_%7Bvj%7D%29%20%2B%20PerformOn_%7Bij%7D%2A%28%5Cbeta_%7Bp3%7D%2B%5Cbeta_%7Bp4%7D%28perform1%29_%7Bij%7D%2B%0A%5Cbeta_%7Bp5%7D%28verb1%29_%7Bij%7D%2Be_%7Bvj%7D%29 " Grade6outcome_{ij} = VerbOn_{ij}*(\beta_{v0} + \beta_{v1}(Verb1)_{ij}+\beta_{v2}(Perform1)+e_{vj}) + PerformOn_{ij}*(\beta_{p3}+\beta_{p4}(perform1)_{ij}+
+\beta_{p5}(verb1)_{ij}+e_{vj})")
 
 **VerbOn=Dummy \_\_ variable (Verb=1, not=0)**  
 **PerformOn=Dummy varaible (Perform=1, not=0)**
 
 ### Performance
 
-4.  Thus, when verbOn = 0:
-    *G**r**a**d**e*6*o**u**t**c**o**m**e*<sub>*i**j*</sub> = *P**e**r**f**o**r**m**O**n*<sub>*i**j*</sub> \* (*β*<sub>*p*3</sub>+*β*<sub>*p*4</sub>(*p**e**r**f**o**r**m*1)<sub>*i**j*</sub>+*β*<sub>*p*5</sub>(*v**e**r**b*1)<sub>*i**j*</sub>+*e*<sub>*p**j*</sub>)
+4)  Thus, when verbOn = 0:
 
-*β*<sub>*p*3</sub> is Verbal’s intercept *β*<sub>*p*4</sub> the actor
-effect on perform *β*<sub>*p*5</sub> the partner effect on perform
-*e*<sub>*p**j*</sub> Perform’s residual in person J
+    ![ Grade6outcome\_{ij} =  PerformOn\_{ij}\*(\\beta\_{p3}+\\beta\_{p4}(perform1)\_{ij}+
+    \\beta\_{p5}(verb1)\_{ij}+e\_{pj})](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%20Grade6outcome_%7Bij%7D%20%3D%20%20PerformOn_%7Bij%7D%2A%28%5Cbeta_%7Bp3%7D%2B%5Cbeta_%7Bp4%7D%28perform1%29_%7Bij%7D%2B%0A%5Cbeta_%7Bp5%7D%28verb1%29_%7Bij%7D%2Be_%7Bpj%7D%29 " Grade6outcome_{ij} =  PerformOn_{ij}*(\beta_{p3}+\beta_{p4}(perform1)_{ij}+
+    \beta_{p5}(verb1)_{ij}+e_{pj})")
+
+![\\beta\_{p3}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbeta_%7Bp3%7D "\beta_{p3}")
+is Verbal’s intercept
+![\\beta\_{p4}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbeta_%7Bp4%7D "\beta_{p4}")
+the actor effect on perform
+![\\beta\_{p5}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbeta_%7Bp5%7D "\beta_{p5}")
+the partner effect on perform
+![e\_{pj}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;e_%7Bpj%7D "e_{pj}")
+Perform’s residual in person J
 
 ### Verbal
 
-5.  When the PerformOn is 0:
+5)  When the PerformOn is 0:
 
-*G**r**a**d**e*6*o**u**t**c**o**m**e*<sub>*i**j*</sub> = *V**e**r**b**O**n*<sub>*i**j*</sub> \* (*β*<sub>*v*0</sub>+*β*<sub>*v*1</sub>(*V**e**r**b*1)<sub>*i**j*</sub>+*β*<sub>*v*2</sub>(*P**e**r**f**o**r**m*1)<sub>*i**j*</sub>+*e*<sub>*v**j*</sub>)
-*β*<sub>*v*0</sub> is Verbal’s intercept *β*<sub>*v*1</sub> the actor
-effect on verbal *β*<sub>*v*2</sub> the partner effect on verbal
-*e*<sub>*v**j*</sub> verb’s residual in person J
+![ Grade6outcome\_{ij} = VerbOn\_{ij}\*(\\beta\_{v0} + \\beta\_{v1}(Verb1)\_{ij}+\\beta\_{v2}(Perform1)\_{ij}+e\_{vj}) ](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%20Grade6outcome_%7Bij%7D%20%3D%20VerbOn_%7Bij%7D%2A%28%5Cbeta_%7Bv0%7D%20%2B%20%5Cbeta_%7Bv1%7D%28Verb1%29_%7Bij%7D%2B%5Cbeta_%7Bv2%7D%28Perform1%29_%7Bij%7D%2Be_%7Bvj%7D%29%20 " Grade6outcome_{ij} = VerbOn_{ij}*(\beta_{v0} + \beta_{v1}(Verb1)_{ij}+\beta_{v2}(Perform1)_{ij}+e_{vj}) ")
+
+![\\beta\_{v0}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbeta_%7Bv0%7D "\beta_{v0}")
+is Verbal’s intercept
+![\\beta\_{v1}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbeta_%7Bv1%7D "\beta_{v1}")
+the actor effect on verbal
+![\\beta\_{v2}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbeta_%7Bv2%7D "\beta_{v2}")
+the partner effect on verbal
+![e\_{vj}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;e_%7Bvj%7D "e_{vj}")
+verb’s residual in person J
 
 ``` r
 apim_full <- gls(grade6_score ~   -1+   #no intercept 
@@ -357,13 +389,3 @@ verbal 6
 perfo 6  
 **verb1:perform_on 0.182846 **  
 non-sig.
-
-Further study :
-
-Acutally, in the tutorial, it is said that Residual standard error:
-7.545255 \<- this is the SE for verbal scores and 7.545255 x Rho =
-7.545255 x 0.31 = 8.98 is performance scores’ estimated SE. I do not
-cleary understand this.
-
-Thus,(not in the very next portforlio, but soon…) I will do the dyadic
-analysis again with different approaches.

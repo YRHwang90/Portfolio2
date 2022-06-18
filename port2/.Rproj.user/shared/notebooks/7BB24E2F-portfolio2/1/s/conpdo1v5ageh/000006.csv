@@ -1,4 +1,0 @@
-"0",""
-"0","data_melt$verb_on <- ifelse(data_melt$grade6_variable == ""verb6"", 1, 0)"
-"0","data_melt$perform_on <- ifelse(data_melt$grade6_variable == ""perfo6"", 1, 0)"
-"0","print(head(data_melt,10))"
